@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Parameters;
+﻿using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 using System;
 using System.Security.Cryptography;
@@ -109,6 +108,57 @@ namespace CandyJun.Aes
         }
 
         /// <summary>
+        /// AES加密（BouncyCastle模式）
+        /// </summary>
+        /// <param name="aes"></param>
+        /// <param name="str">待加密的字符串（UTF8编码）</param>
+        /// <param name="mode">加密模式</param>
+        /// <param name="padding">填充算法</param>
+        /// <param name="key">密钥</param>
+        /// <param name="iv">向量</param>
+        /// <returns>base64编码格式加密字符串</returns>
+        public static string EncryptBC(this System.Security.Cryptography.Aes aes,
+            string str, CipherModeBC mode, CipherPaddingBC padding, byte[] key = null, byte[] iv = null)
+        {
+            return aes.EncryptBC(str, Encoding.UTF8, mode, padding, key, iv);
+        }
+
+        /// <summary>
+        /// AES加密（BouncyCastle模式）
+        /// </summary>
+        /// <param name="aes"></param>
+        /// <param name="str">待加密的字符串</param>
+        /// <param name="encoding">待加密的字符串编码格式</param>
+        /// <param name="mode">加密模式</param>
+        /// <param name="padding">填充算法</param>
+        /// <param name="key">密钥</param>
+        /// <param name="iv">向量</param>
+        /// <returns>base64编码格式加密字符串</returns>
+        public static string EncryptBC(this System.Security.Cryptography.Aes aes,
+            string str, Encoding encoding, CipherModeBC mode, CipherPaddingBC padding, byte[] key = null, byte[] iv = null)
+        {
+            var data = encoding.GetBytes(str);
+            var result = aes.EncryptBC(data, mode, padding, key, iv);
+            return Convert.ToBase64String(result);
+        }
+
+        /// <summary>
+        /// AES加密（BouncyCastle模式）
+        /// </summary>
+        /// <param name="aes"></param>
+        /// <param name="data">待加密的数据</param>
+        /// <param name="mode">加密模式</param>
+        /// <param name="padding">填充算法</param>
+        /// <param name="key">密钥</param>
+        /// <param name="iv">向量</param>
+        /// <returns>加密数据</returns>
+        public static byte[] EncryptBC(this System.Security.Cryptography.Aes aes,
+            byte[] data, CipherModeBC mode, CipherPaddingBC padding, byte[] key = null, byte[] iv = null)
+        {
+            return aes.CryptoBC(true, data, mode, padding, key, iv);
+        }
+
+        /// <summary>
         /// AES解密
         /// </summary>
         /// <param name="aes"></param>
@@ -205,6 +255,58 @@ namespace CandyJun.Aes
         }
 
         /// <summary>
+        /// AES解密（BouncyCastle模式）
+        /// </summary>
+        /// <param name="aes"></param>
+        /// <param name="str">待解密的字符串（base64编码格式）</param>
+        /// <param name="mode">解密模式</param>
+        /// <param name="padding">填充算法</param>
+        /// <param name="key">密钥</param>
+        /// <param name="iv">向量</param>
+        /// <returns>UTF8编码解密字符串</returns>
+        public static string DecryptBC(this System.Security.Cryptography.Aes aes,
+            string str, CipherModeBC mode, CipherPaddingBC padding, byte[] key = null, byte[] iv = null)
+        {
+            return aes.DecryptBC(str, Encoding.UTF8, mode, padding, key, iv);
+        }
+
+        /// <summary>
+        /// AES解密（BouncyCastle模式）
+        /// </summary>
+        /// <param name="aes"></param>
+        /// <param name="str">待解密的字符串（base64编码格式）</param>
+        /// <param name="encoding">待解密的字符串编码格式</param>
+        /// <param name="mode">解密模式</param>
+        /// <param name="padding">填充算法</param>
+        /// <param name="key">密钥</param>
+        /// <param name="iv">向量</param>
+        /// <returns>解密字符串</returns>
+        public static string DecryptBC(this System.Security.Cryptography.Aes aes,
+            string str, Encoding encoding, CipherModeBC mode, CipherPaddingBC padding, 
+            byte[] key = null, byte[] iv = null)
+        {
+            var data = Convert.FromBase64String(str);
+            var result = aes.DecryptBC(data, mode, padding, key, iv);
+            return encoding.GetString(result);
+        }
+
+        /// <summary>
+        /// AES解密（BouncyCastle模式）
+        /// </summary>
+        /// <param name="aes"></param>
+        /// <param name="data">待解密的数据</param>
+        /// <param name="mode">解密模式</param>
+        /// <param name="padding">填充算法</param>
+        /// <param name="key">密钥</param>
+        /// <param name="iv">向量</param>
+        /// <returns>解密后数据</returns>
+        public static byte[] DecryptBC(this System.Security.Cryptography.Aes aes,
+            byte[] data, CipherModeBC mode, CipherPaddingBC padding, byte[] key = null, byte[] iv = null)
+        {
+            return aes.CryptoBC(false, data, mode, padding, key, iv);
+        }
+
+        /// <summary>
         /// AES加解密
         /// </summary>
         /// <param name="aes"></param>
@@ -222,6 +324,23 @@ namespace CandyJun.Aes
             aes.Padding = padding ?? aes.Padding;
             var cryptor = forEncryption ? aes.CreateEncryptor() : aes.CreateDecryptor();
             return cryptor.TransformFinalBlock(data, 0, data.Length);
+        }
+
+        /// <summary>
+        /// AES加解密（BouncyCastle模式）
+        /// </summary>
+        /// <param name="aes"></param>
+        /// <param name="forEncryption">是否加密（false为解密）</param>
+        /// <param name="data">待加解密的数据</param>
+        /// <param name="mode">加解密模式</param>
+        /// <param name="padding">填充算法</param>
+        /// <param name="key">密钥</param>
+        /// <param name="iv">向量</param>
+        /// <returns>加解密后数据</returns>
+        public static byte[] CryptoBC(this System.Security.Cryptography.Aes aes,
+            bool forEncryption, byte[] data, CipherModeBC mode, CipherPaddingBC padding, byte[] key, byte[] iv)
+        {
+            return aes.CryptoBC(forEncryption, data, $"AES/{mode}/{padding}", key, iv);
         }
 
         /// <summary>

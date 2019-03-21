@@ -32,7 +32,7 @@ namespace CandyJun.Aes
         /// <returns>原始密钥</returns>
         public static string GenerateKey(this SymmetricAlgorithm algorithm, int sourceLength, int finalLength = 16)
         {
-            var key = string.Join("", Guid.NewGuid().ToString("X").Take(sourceLength));
+            var key = string.Join("", Guid.NewGuid().ToString("N").Take(sourceLength));
             algorithm.GenerateKey(key, finalLength);
             return key;
         }
@@ -59,7 +59,7 @@ namespace CandyJun.Aes
         /// <returns>原始向量</returns>
         public static string GenerateIV(this SymmetricAlgorithm algorithm, int sourceLength, int finalLength = 16)
         {
-            var key = string.Join("", Guid.NewGuid().ToString("X").Take(sourceLength));
+            var key = string.Join("", Guid.NewGuid().ToString("N").Take(sourceLength));
             algorithm.GenerateIV(key, finalLength);
             return key;
         }
